@@ -86,7 +86,7 @@ def load_files(filelist):
 
 def main(args, config, file_names):
 
-    path = "/vols/cms/dw515/Offline/output/SM/Jan24_2016_ttonly/"
+    path = "/vols/cms/dw515/Offline/output/SM/cpprod_2016/"
 
     # Sanity checks
     for sample in file_names:

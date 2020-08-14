@@ -100,7 +100,7 @@ def main(args, config, file_names):
     # path = "/vols/cms/dw515/Offline/output/SM/May04_2017/"
     # path = "/vols/cms/dw515/Offline/output/SM/May11_2017/"
     # path = "/vols/cms/dw515/Offline/output/SM/May19_2017/"
-    path = '/vols/cms/dw515/Offline/output/SM/May30_2017/'
+    path = '/vols/cms/dw515/Offline/output/SM/cpprod_2017/'
 
     # Sanity checks
     for sample_ in file_names:
@@ -219,7 +219,9 @@ def main(args, config, file_names):
 
             # Get event number and compute response
             event = int(getattr(tree, "event"))
-            m_sv = float(getattr(tree, "svfit_mass"))
+            if tree.GetListOfBranches().FindObject("svfit_mass"):
+              m_sv = float(getattr(tree, "svfit_mass"))
+            else: m_sv=-1
 
             if m_sv > 0:
 

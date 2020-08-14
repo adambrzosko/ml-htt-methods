@@ -90,14 +90,14 @@ def main(args, config, file_names):
     # path = "/vols/cms/akd116/Offline/output/SM/2019/Jun07_2016/"
     # path = "/vols/cms/mhh18/Offline/output/SM/11Nov_Run2018_tautau/"
     # path = "/vols/cms/akd116/Offline/output/SM/2019/Nov21_2017_v2/"
-    path = "/vols/cms/dw515/Offline/output/SM/Jan24_2017_ttonly/"
+    path = "/vols/cms/dw515/Offline/output/SM/cpprod_2017/"
 
     # Sanity checks
     for sample in file_names:
         print sample
         # if not os.path.exists("{}/{}_{}_{}.root".format(path, sample, args.channel, args.era)):
         if not os.path.exists("{}/{}".format(path, sample)):
-            logger.fatal("Input file %s does not exist.", sample)
+            logger.fatal("Input file %s does not exist", sample)
             raise Exception
 
         logger.debug("Following mapping of classes to class numbers is used.")
