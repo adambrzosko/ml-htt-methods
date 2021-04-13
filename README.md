@@ -66,7 +66,9 @@ then MC + systematics (3 hour queue):
 
 to split large jobs up more
 
+- change directory paths in batch_annotate_split_18.sh  and annotate_file_split_18.py (sppear several times so check them well)
 - Run following commands (not this example is only for 2017 running only tauF and the filtered VBF signal samples)
+
 
     `for era in 2016 2017 2018 ; do mkdir filelist/tmp_${era}_split/ && mkdir filelist/tmp_${era}_split/tt/; done`
 
