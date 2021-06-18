@@ -5,7 +5,7 @@ and then train on with an algorithm of choice (XGBoost, keras, sklearn etc) / or
 ### Git instructions
 
 `git@github.com:danielwinterbottom/ml-htt-methods.git`
-`git checkout fullrun2` 
+`git checkout urops` 
  
 
 ### Train
