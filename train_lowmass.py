@@ -10,6 +10,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_curve, roc_auc_score, auc
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import xgboost as xgb
 import json
@@ -555,6 +557,9 @@ frames = [backgrounds_df, ggh_df, vbf_df]
 X = pd.concat(frames)
 w = X["wt_3"]
 
+# need to make sure all variables are floats otherwise will have problems adding it later on
+for x in training_vars: X[x] = X[x].astype(float)
+
 y_frames = [y_background, y_ggh, y_vbf]
 
 y = pd.concat(y_frames)
@@ -615,7 +620,7 @@ for p in training_vars: plot_signal_background(backgrounds_df, vbf_df, p, chan, 
 
 # split into train and validation dataset 
 X_train,X_test, y_train,y_test,w_train,w_test  = train_test_split(
-    X,
+    X.values,
     y,
     w,
     test_size=0.2,

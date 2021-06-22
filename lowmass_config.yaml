@@ -1,0 +1,26 @@
+# Define classes based on tree names in dataset file
+classes:
+    - Background
+    - ggH
+    - VBF
+
+# Define list of variables to be used for training
+variables:
+
+    - pt_1
+    - pt_2
+    - m_vis
+    - pt_vis
+    - svfit_mass
+    - jpt_1
+    - n_jets
+    - jdeta
+    - mjj
+    - dijetpt
+    - pt_tt
+    - mt_1
+    - mt_tot
+    - mt_2
+    - mt_lep
+    - met
+    - jpt_2
