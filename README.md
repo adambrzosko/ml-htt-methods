@@ -4,10 +4,13 @@ and then train on with an algorithm of choice (XGBoost, keras, sklearn etc) / or
 
 ### Git instructions
 
-`git clone -b fullrun2 git@github.com:albertdow/ml-htt-methods.git`
+`git clone -b lowmass git@github.com:albertdow/ml-htt-methods.git`
 
 ### Train
-TO DO
+
+`python train_lowmass.py -c ${chan} -y ${year} -s ${sign}`
+
+sign selects whether you train on even or odd events - we train seperatly on both to make sure we never train on the same events that we use in the analysis (in signal / background templates)   
 
 ### Annotate
 

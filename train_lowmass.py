@@ -52,11 +52,15 @@ sel_vars = [
     "deepTauVsJets_medium_1",
     "deepTauVsJets_vvvloose_1",
     "deepTauVsEle_vvloose_1",
+    "deepTauVsEle_tight_1",
     "deepTauVsMu_tight_1",
+    "deepTauVsMu_vloose_1",
     "deepTauVsJets_medium_2",
     "deepTauVsJets_vvvloose_2",
     "deepTauVsEle_vvloose_2",
+    "deepTauVsEle_tight_2",
     "deepTauVsMu_tight_2",
+    "deepTauVsMu_vloose_2",
     "leptonveto",
     "trg_mutaucross",
     "trg_etaucross",
@@ -268,6 +272,7 @@ def apply_filters(df, chan='mt',FF=False):
 count=0
 for f in backgrounds:
    print 'loading %(f)s' % vars() 
+   print sdir+f+file_ext
    tree=uproot.open(sdir+f+file_ext)["ntuple"]
    df = tree.pandas.df(invars)
    sf = GetCrossWeight(f,year)
