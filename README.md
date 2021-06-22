@@ -4,7 +4,8 @@ and then train on with an algorithm of choice (XGBoost, keras, sklearn etc) / or
 
 ### Git instructions
 
-`git clone -b lowmass git@github.com:albertdow/ml-htt-methods.git`
+`git@github.com:danielwinterbottom/ml-htt-methods.git`
+`git checkout lowmass` 
 
 ### Train
 
@@ -16,79 +17,23 @@ sign selects whether you train on even or odd events - we train seperatly on bot
 
 To annotate files ROOT files with trained (XBG) model follow these steps:
 
-- Open annotate_file_inc_16.py, annotate_file_inc_17.py and annotate_file_inc_18.py, 
-search for path and replace with your directory where the ROOT files are stored (ie. /vols/cms/)
+- choose the year you are running for and directory you are adding the BDT scores for
 
-- Open batch_annotate_inc_16.sh, batch_annotate_inc_17.sh and batch_annotate_inc_18.sh
-and change `cd` and `source` lines to your own CMSSW repo. Also check model_folder 
-is the one you want to use, and config is the corresponding one. 
-    `--model_folder <path_to_model_folder>`
-    `--config-training <path_to_model_folder>/tt_config_<era>.yaml`
-For example if want to use training with all variables (2016 training):
-    `--model_folder data_tauspinner_12Mar2020_2016/`
-    `--config-training data_tauspinner_12Mar2020_2016/tt_config_2016.yaml`
-If want to use training without pT2,dijetpt variables (2016):
-    `--model_folder data_tauspinner_12Mar2020_2016_NopT2dijetpT/`
-    `--config-training data_tauspinner_12Mar2020_2016_NopT2dijetpT//tt_config_2016.yaml`
-    
+  `YEAR=2018`
+  `DIR=/vols/cms/dw515/masters_polvec_test/CMSSW_10_2_19/src/UserCode/ICHiggsTauTau/Analysis/HiggsTauTauRun2/outputTTMT/`
 
-- Run following commands
-    
-    `for era in 2016 2017 2018 ; do mkdir filelist/tmp_${era}/ && mkdir filelist/tmp_${era}/tt/; done`
+- make directroies and generate your job scripts 
 
-    `for era in 2016 2017 2018 ; do cd filelist/tmp_${era}/tt/ && split -l 1 -a 4 --numeric-suffixes ../../full_tt_${era}.txt && cd ../../../; done`
+  `./generate_parajob.sh $YEAR $DIR`
 
-    `mkdir err && mkdir out`
+  `mkdir err && mkdir out`
 
-At this stage the user ready to run:
+  `mkdir filelist/tmp_${YEAR}_split/ && mkdir filelist/tmp_${YEAR}_split/tt/`
 
-- If you want to test on one job on the batch do:
+  `cd filelist/tmp_${era}_split/tt/ && python ../../../geteratejobs.py --filelist=../../full_tt_${YEAR}.txt --dir=$DIR && cd ../../../`
 
-    `qsub -e err/ -o out/ -cwd -V -q hep.q -t 210-210:1 batch_annotate_inc_16.sh`
+- submit the jobs to the batch
 
-- If you want to submit all years for all systematics -- data + embedding first (long queue), 
-then MC + systematics (3 hour queue):
-
-    2016:
-
-    `qsub -e err/ -o out/ -cwd -V -l h_rt=10:0:0 -q hep.q -t 1-209:1 batch_annotate_inc_16.sh; done`
-
-    `qsub -e err/ -o out/ -cwd -V -l h_rt=3:0:0 -q hep.q -t 210-2665:1 batch_annotate_inc_16.sh; done`
-
-    2017:
-
-    `qsub -e err/ -o out/ -cwd -V -l h_rt=10:0:0 -q hep.q -t 1-195:1 batch_annotate_inc_17.sh; done`
-
-    `qsub -e err/ -o out/ -cwd -V -l h_rt=3:0:0 -q hep.q -t 196-2121:1 batch_annotate_inc_17.sh; done`
-
-    2018:
-
-    `qsub -e err/ -o out/ -cwd -V -l h_rt=10:0:0 -q hep.q -t 1-526:1 batch_annotate_inc_18.sh; done`
-
-    `qsub -e err/ -o out/ -cwd -V -l h_rt=3:0:0 -q hep.q -t 527-3592:1 batch_annotate_inc_18.sh; done`
-
-to split large jobs up more
-
-- change directory paths in batch_annotate_split_18.sh  and annotate_file_split_18.py (sppear several times so check them well)
-- Run following commands (not this example is only for 2017 running only tauF and the filtered VBF signal samples)
-
-
-    `for era in 2016 2017 2018 ; do mkdir filelist/tmp_${era}_split/ && mkdir filelist/tmp_${era}_split/tt/; done`
-
-    `for era in 2016 2017 2018 ; do cd filelist/tmp_${era}_split/tt/ && python ../../../geteratejobs.py --filelist=../../full_tt_${era}.txt --dir=/vols/cms/dw515/Offline/output/SM/Jan24_${era}_ttonly/ && cd ../../../; done`
-
-    2016:
-
-    `qsub -e err/ -o out/ -cwd -V -l h_rt=3:0:0 -q hep.q -t 1-3001:1 batch_annotate_split_16.sh`
-
-    2017:
-
-
-    `qsub -e err/ -o out/ -cwd -V -l h_rt=3:0:0 -q hep.q -t 1-2456:1 batch_annotate_split_17.sh`
-
-    2018:
-
-
-    `qsub -e err/ -o out/ -cwd -V -l h_rt=3:0:0 -q hep.q -t 1-2289:1 batch_annotate_split_18.sh`
-
+  `max=$(ls filelist/tmp_${YEAR}_split/tt/x* | wc -l)`
+  `qsub -e err/ -o out/ -cwd -V -l h_rt=3:0:0 -q hep.q -t 1-${max}:1 batch_annotate_parajob_${YEAR}.sh`
 
