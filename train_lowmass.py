@@ -49,6 +49,7 @@ sel_vars = [
     "wt_ff_mssm_1",
     "os", 
     "iso_1",
+    "iso_2",
     "gen_match_1",
     "gen_match_2",
     "deepTauVsJets_medium_1",
@@ -95,7 +96,14 @@ training_vars = [
   "jpt_2",
 ]
 
+if chan == "em":
+  training_vars += ['pzeta']
+  sel_vars += ['wt_em_qcd']
+  sel_vars.remove('wt_ff_mssm_1')
+
 invars = training_vars+sel_vars
+
+print invars
 
 if year == '2016':
   ztt_samples = ['DYJetsToLL-LO-ext1','DYJetsToLL-LO-ext2','DY1JetsToLL-LO','DY2JetsToLL-LO','DY3JetsToLL-LO','DY4JetsToLL-LO','EWKZ2Jets_ZToLL','EWKZ2Jets_ZToLL-ext1','EWKZ2Jets_ZToLL-ext2']
@@ -129,7 +137,7 @@ if year == '2018':
   sm_higgs = ['GluGluHToTauTau_M-125', 'VBFHToTauTau_M-125-ext1','ZHToTauTau_M-125','WplusHToTauTau_M-125','WminusHToTauTau_M-125']
 
 # remove wjets samples because they come from FF
-wjets_samples = []
+if chan != "em": wjets_samples = []
 backgrounds = ztt_samples+top_samples+vv_samples+wjets_samples+sm_higgs
 
 data_name=''
@@ -172,6 +180,14 @@ if year == '2017':
 if year == '2018':
   sdir='/vols/cms/dw515/Offline/output/MSSM/mssm_2018_v2/'
 
+if chan == 'em':
+  if year == '2016':
+    sdir='/vols/cms/dw515/Offline/output/SM/cpprod_2016/'
+  if year == '2017':
+    sdir='/vols/cms/dw515/Offline/output/SM/cpprod_2017/'
+  if year == '2018':
+    sdir='/vols/cms/dw515/Offline/output/SM/cpprod_2018/'
+
 def apply_filters(df, chan='mt',FF=False):
 
   if chan == 'mt':
@@ -181,6 +197,7 @@ def apply_filters(df, chan='mt',FF=False):
           &(df["os"] > 0.5)
           &(df["wt"] < 2)
           &(df["mt_1"] < 50)
+          &(df["pt_2"] > 30)
           &(df["iso_1"] < 0.15)
           &(df["deepTauVsJets_medium_2"] > 0.5)
           &(df["deepTauVsEle_vvloose_2"] > 0.5)
@@ -195,6 +212,7 @@ def apply_filters(df, chan='mt',FF=False):
           (df["os"] > 0.5)
          &(df["wt"] < 2)
          &(df["mt_1"] < 50)
+         &(df["pt_2"] > 30)
          &(df["iso_1"] < 0.15)
          &(df["deepTauVsJets_vvvloose_2"] > 0.5)
          &(df["deepTauVsJets_medium_2"] < 0.5)
@@ -212,6 +230,7 @@ def apply_filters(df, chan='mt',FF=False):
           &(df["os"] > 0.5)
           &(df["wt"] < 2)
           &(df["mt_1"] < 50)
+          &(df["pt_2"] > 30)
           &(df["iso_1"] < 0.15)
           &(df["deepTauVsJets_medium_2"] > 0.5)
           &(df["deepTauVsEle_tight_2"] > 0.5)
@@ -226,6 +245,7 @@ def apply_filters(df, chan='mt',FF=False):
             (df["os"] > 0.5)
            &(df["wt"] < 2)
            &(df["mt_1"] < 50)
+           &(df["pt_2"] > 30)
            &(df["iso_1"] < 0.15)
            &(df["deepTauVsJets_vvvloose_2"] > 0.5)
            &(df["deepTauVsJets_medium_2"] < 0.5)
@@ -268,6 +288,35 @@ def apply_filters(df, chan='mt',FF=False):
           &(df["n_bjets"] == 0)
           &(df["trg_doubletau"] > 0.5)
           &(df["svfit_mass"] < 250)
+      ]
+  if chan == 'em':
+    if not FF:
+      df = df[
+          (df["os"] > 0.5)
+          &(df["wt"] < 2)
+          &(df["n_bjets"] == 0) 
+          &(df["leptonveto"] == 0)
+          &(df["trg_muonelectron"] > 0.5)
+          &(df["svfit_mass"] < 250)
+          &(df["pt_1"] > 15)
+          &(df["pt_2"] > 15)
+          &(df["iso_1"] < 0.15)
+          &(df["iso_2"] < 0.2)
+          &(df["pzeta"] > -35)
+      ]
+    else:
+      df = df[
+          (df["os"] < 0.5)
+          &(df["wt"] < 2)
+          &(df["n_bjets"] == 0)
+          &(df["leptonveto"] == 0)
+          &(df["trg_muonelectron"] > 0.5)
+          &(df["svfit_mass"] < 250)
+          &(df["pt_1"] > 15)
+          &(df["pt_2"] > 15)
+          &(df["iso_1"] < 0.15)
+          &(df["iso_2"] < 0.2)
+          &(df["pzeta"] > -35)
       ]
   return df
 
@@ -316,7 +365,8 @@ for f in ff_files:
    print 'loading %(f)s' % vars()    
    tree=uproot.open(sdir+f+file_ext)["ntuple"]
    df = tree.pandas.df(invars)
-   df.loc[:,"wt_2"] = df["wt_ff_mssm_1"]
+   if chan != 'em': df.loc[:,"wt_2"] = df["wt_ff_mssm_1"]
+   else: df.loc[:,"wt_2"] = df["wt_em_qcd"]
    df=apply_filters(df,chan,True) 
    if count == 0: ff_df = df
    else: ff_df = pd.concat([ff_df,df], ignore_index=True)

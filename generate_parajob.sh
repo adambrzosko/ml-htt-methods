@@ -17,8 +17,13 @@ echo "inputNumber=\$SGE_TASK_ID" >> $OUTPUT
 
 echo "export \"OMP_NUM_THREADS=1\"" >> $OUTPUT
 
+if [ $chan == "em" ]; then
+  config="lowmass_config_em.yaml"
+else
+  config="lowmass_config.yaml"
+fi
 
-echo "python annotate_file_split.py filelist/tmp_2018_split/${chan}/x\${inputNumber} lowmass_v1 --path ${dir}  --output-folder ${dir} --training lowmass --era ${year} --channel ${chan} --config-training lowmass_config.yaml &> filelist/tmp_2018_split/${chan}/\${inputNumber}.log" >> $OUTPUT 
+echo "python annotate_file_split.py filelist/tmp_${year}_split/${chan}/x\${inputNumber} lowmass_v1 --path ${dir}  --output-folder ${dir} --training lowmass --era ${year} --channel ${chan} --config-training ${config} &> filelist/tmp_${year}_split/${chan}/\${inputNumber}.log" >> $OUTPUT 
 
 chmod +x $OUTPUT
 

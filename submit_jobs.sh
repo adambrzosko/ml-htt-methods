@@ -1,7 +1,13 @@
+ulimit -s unlimited
+source /vols/grid/cms/setup.sh
+export SCRAM_ARCH=slc7_amd64_gcc700
+eval `scramv1 runtime -sh`
+
 YEAR=$1
 DIR=$2
 CHAN=$3
 
+rm -r filelist/tmp_${YEAR}_split/${CHAN}/
 
 ./generate_parajob.sh $YEAR $DIR $CHAN
 
