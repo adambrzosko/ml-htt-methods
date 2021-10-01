@@ -5,11 +5,14 @@ import matplotlib.pyplot as plt
 import pickle
 import plot_functions as pf
 from scipy import interp
-# from root_numpy import array2root
+from root_numpy import array2root
+from root_numpy import root2array
+from root_numpy import tree2array
+from root_numpy import array2tree
 import json
 import operator
 import gc
-# from eli5 import explain_prediction_xgboost
+#from eli5 import explain_prediction_xgboost
 
 from keras.models import Sequential
 from keras.initializers import RandomNormal
@@ -17,6 +20,7 @@ from keras.layers import Dense
 from keras.layers import Activation
 from keras.layers import *
 from keras.optimizers import Nadam
+##
 from keras.optimizers import adam
 from keras.regularizers import l2
 from keras.callbacks import EarlyStopping
@@ -49,8 +53,91 @@ from sklearn.feature_selection import mutual_info_classif
 from sklearn.feature_selection import SelectFromModel
 from sklearn.neural_network import MLPClassifier
 
-from bayes_opt import BayesianOptimization
+##
+#from bayes_opt import BayesianOptimization
 
+####### Compute BDT even/odd score work in progress A.C. #############
+
+import uproot
+
+
+def AddBDT_EvenOdd_RhoRho(data_path, BDTname = 'BDTOddEven'):
+    tree = uproot.open("%s"%data_path)["ntuple"]    
+    variables = ["wt_cp_sm", "wt_cp_ps", "wt_cp_mm",
+                "rand",
+                "pt_1","pt_2",
+                "met",
+                "aco_angle_1", "aco_angle_5","aco_angle_6",
+                "y_1_1", "y_1_2",
+                "ip_sig_1", "ip_sig_2",
+                "mva_dm_1","mva_dm_2",
+                "tau_decay_mode_1","tau_decay_mode_2",
+                "deepTauVsJets_medium_1","deepTauVsJets_medium_2",
+                "deepTauVsEle_vvloose_1","deepTauVsEle_vvloose_2",
+                "deepTauVsMu_vloose_1","deepTauVsMu_vloose_2",
+                "trg_doubletau", "pv_angle_new"
+             ]
+    
+    pi_1 = ["pi_E_1", "pi_px_1", "pi_py_1", "pi_pz_1"]
+    pi_2 = ["pi_E_2", "pi_px_2", "pi_py_2", "pi_pz_2"]
+    pi0_1 = ["pi0_E_1", "pi0_px_1", "pi0_py_1", "pi0_pz_1"]
+    pi0_2 = ["pi0_E_2", "pi0_px_2", "pi0_py_2", "pi0_pz_2"]
+    pi2_1 = ["pi2_E_1", "pi2_px_1", "pi2_py_1", "pi2_pz_1"]
+    pi2_2 = ["pi2_E_2", "pi2_px_2", "pi2_py_2", "pi2_pz_2"]
+    pi3_1 = ["pi3_E_1", "pi3_px_1", "pi3_py_1", "pi3_pz_1"]
+    pi3_2 = ["pi3_E_2", "pi3_px_2", "pi3_py_2", "pi3_pz_2"]
+    pis = pi_1 + pi_2 + pi2_1 + pi2_2 + pi3_1 + pi3_2 
+
+    X = tree.pandas.df(variables)
+    #+ pis) For now we ignore the pis, don't bring to the training
+    
+    X['index'] =  np.arange(0, len(X), 1)
+    
+    X1 = X[
+        (X["tau_decay_mode_1"] == 1) 
+        & (X["tau_decay_mode_2"] == 1) 
+        & (X["mva_dm_1"] == 1) 
+        & (X["mva_dm_2"] == 1)]
+    
+    X2 = X1.drop([
+                "wt_cp_sm","wt_cp_ps","wt_cp_mm", "rand",
+                "tau_decay_mode_1","tau_decay_mode_2","mva_dm_1","mva_dm_2",
+                "deepTauVsJets_medium_1","deepTauVsJets_medium_2",
+                "deepTauVsEle_vvloose_1","deepTauVsEle_vvloose_2",
+                "deepTauVsMu_vloose_1","deepTauVsMu_vloose_2",
+                "trg_doubletau"
+            ], axis=1).reset_index(drop=True) #+ pis
+    
+    objectRep = open("/vols/cms/ac4317/UROP_2021/CMSSW_10_2_19/src/UserCode/ICHiggsTauTau/Analysis/HiggsTauTauRun2/ml-htt-methods/tt_RhoRho_Model2_GluGluVBF_xgb.pkl","rb")
+    model = pickle.load(objectRep)
+    y2 = model.predict_proba(X2)
+    print(y2) 
+    y1_proba = np.array(y2.T[0])
+    
+    k=0
+    long_x2 = np.zeros(len(X))-9999.
+    for i in X2['index']:
+        long_x2[i] = y1_proba[k]
+        k = k+1
+    
+    tree_2 = root2array('%s'%data_path)
+    b = np.array(long_x2, dtype=[('BDTOddEven', np.float64)])
+    print(tree_2, b)
+   
+    
+    tree_ok = array2tree(tree_2)
+    tree_plus = array2tree(b, tree=tree_ok)
+
+
+    tree_2 = tree2array(tree_plus)
+    array2root(tree_2, '%s.root'%(data_path[:-5]), treename='ntuple', mode='recreate')
+    
+    return None
+    
+        
+    
+
+###########################################################
 def fit_ttsplit(X, channel, fold):
 
     X["zfeld"] = np.fabs(X.eta_h - (X.jeta_1 + X.jeta_2)/2.)
