@@ -28,7 +28,7 @@ To annotate files ROOT files with trained (XBG) model follow these steps:
 
   `mkdir filelist/tmp_${YEAR}_split/ && mkdir filelist/tmp_${YEAR}_split/tt/`
 
-  `cd filelist/tmp_${era}_split/tt/ && python ../../../geteratejobs.py --filelist=../../full_tt_${YEAR}.txt --dir=$DIR && cd ../../../`
+  `cd filelist/tmp_${YEAR}_split/tt/ && python ../../../geteratejobs.py --filelist=../../full_tt_${YEAR}.txt --dir=$DIR && cd ../../../`
 
 - submit the jobs to the batch
 

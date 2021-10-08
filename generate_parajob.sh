@@ -19,7 +19,7 @@ echo "export \"OMP_NUM_THREADS=1\"" >> $OUTPUT
 # note the BDT is only trained for the tt channel at the moment so this channel is hard coded for now
 # the name of the BDT training is also hard coded for now
 
-echo "python annotate_file_split.py filelist/tmp_2018_split/tt/x\${inputNumber} IC_01Jun2020 --path ${dir} --model_folder ./data_tauspinner_01Jun2020_2018/ --output-folder ${dir} --training tauspinner --era ${year} --channel tt --config-training data_tauspinner_01Jun2020_2018/tt_2018_config_inc.yaml &> filelist/tmp_2018_split/tt/\${inputNumber}.log" >> $OUTPUT 
+echo "python annotate_file_split.py filelist/tmp_${year}_split/tt/x\${inputNumber} IC_01Jun2020 --path ${dir} --model_folder ./data_tauspinner_01Jun2020_${year}/ --output-folder ${dir} --training tauspinner --era ${year} --channel tt --config-training data_tauspinner_01Jun2020_${year}/tt_${year}_config_inc.yaml &> filelist/tmp_${year}_split/tt/\${inputNumber}.log" >> $OUTPUT 
 
 chmod +x $OUTPUT
 
