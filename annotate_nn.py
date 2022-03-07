@@ -25,7 +25,7 @@ def parse_arguments():
         description="Apply NN model on ROOT file")
     parser.add_argument(
         "--config-training",
-        default="mt_xgb_training_config.yaml",	#hace to change this config (not sure what it is)
+        default="nn_training_config.yaml",	#CREATE THIS
         help="Path to training config file")
     parser.add_argument(
         "--dir-prefix",
@@ -38,9 +38,9 @@ def parse_arguments():
         "tag", help="Tag to be used as prefix of the annotation.")
     parser.add_argument(
         "--models",
-        type=str,					#have to change the models here
+        type=str,					
         nargs="+",
-        default=["multi_fold1_cpsm_mt_JHU_xgb.pkl", "multi_fold0_cpsm_mt_JHU_xgb.pkl"],
+        default=["model.pkl"],	#OUR MODEL
         help=
         "Keras models to be used for the annotation. Note that these have to be booked in the reversed order [fold1*, fold0*], so that the training is independent from the application."
     )
@@ -83,6 +83,9 @@ def load_files(filelist):
 
     return file_names
 
+#ADAM ADDITION
+def do_processing():
+    """Run the preprocessing pipeline (A)"""
 
 def main(args, config, file_names):
 
@@ -102,7 +105,7 @@ def main(args, config, file_names):
 
         # Load Keras models and preprocessing
 
-        if args.era != "":	#what is this??
+        if args.era != "":	#what is this?? both decay modes
             with open('{}/multi_fold1_sm_{}_{}_{}_xgb.pkl'
                     .format(args.model_folder, args.channel, args.training, args.era), 'r') as f:
                 xgb_clf_fold1 = pickle.load(f)
@@ -136,12 +139,15 @@ def main(args, config, file_names):
         if file_ == None:
             logger.fatal("File %s is not existent.", sample)
             raise Exception
-
+            
         tree = file_.Get(args.tree)
+        
         # if tree == None:
         #     logger.fatal("Failed to find tree %s in directory %s.",
         #                  args.tree, name)
         #     raise Exception
+        
+        do_processing()
 
         # Book branches for annotation
         values = []
@@ -180,7 +186,7 @@ def main(args, config, file_names):
             if m_sv > 0:
 
                 values_stacked = np.hstack(values).reshape(1, len(values))
-                response = classifier[event % 2].predict_proba(values_stacked,
+                response = classifier[event % 2].predict_proba(values_stacked, #what is this method on xgb???
                         ntree_limit=classifier[event % 2].best_iteration+1)
                 response = np.squeeze(response)
 
